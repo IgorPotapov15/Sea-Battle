@@ -66,12 +66,15 @@ turnY.addEventListener(('click'), () => {
 function nextShips(current) {
   if (current.size === 4) {
     currentShip = playerShips.threeShip;
+    placingRandom()
   }
   if (current.size === 3) {
     currentShip = playerShips.twoShip;
+    placingRandom()
   }
   if (current.size === 2) {
     currentShip = playerShips.oneShip;
+    placingRandom()
   }
   if (current.size === 1) {
     return false;
@@ -80,8 +83,12 @@ function nextShips(current) {
 }
 
 function placingRandom() {
-  // do {
-    for (let i = 1; i < 1000; i++) {
+  if (playerShips.fourShip.rest > 0) {
+    currentShip = playerShips.fourShip;
+  }
+  if (totalShipsRest <= 0) return;
+  do {
+    // for (let i = 1; i < 1000; i++) {
     let randomAxis = Math.random();
     if (randomAxis <= 0.5) {
       axis.main = 'y';
@@ -91,13 +98,9 @@ function placingRandom() {
       axis.second = 'y';
     }
     if (currentShip.rest === 0) {
-      nextShips(currentShip)
-      if (nextShips(currentShip) === false) {
-        return;
-      } else {
-        placingRandom()
-      console.log('Закончились корабли')
-      }
+      nextShips(currentShip);
+      console.log('Закончились корабли');
+      return;
     }
     let randomCol = +(Math.random().toString().substr(2, 1)) + 1;
     let randomRow = +(Math.random().toString().substr(2, 1)) + 1;
@@ -130,11 +133,8 @@ function placingRandom() {
     totalShipsRest = playerShips.fourShip.rest + playerShips.threeShip.rest + playerShips.twoShip.rest + playerShips.oneShip.rest;
     closing();
     console.log(totalShipsRest)
-    }
-    if (totalShipsRest > 0) {
-      placingRandom();
-    }
-  // } while (totalShipsRest === 0);
+    // }
+  } while (totalShipsRest > 0);
 }
 
 function placingShip(e) {
