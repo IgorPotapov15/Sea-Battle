@@ -31,7 +31,7 @@ const playerShips = {
   oneShip: {
     rest: 4,
     size: 1
-  }
+  },
 }
 
 const computerShips = {
@@ -53,18 +53,16 @@ const computerShips = {
   }
 }
 
-let computerShipsRest = 10;
-
-let totalShipsRest = 10;
-
 let closedChunks = [];
 
 let currentShip = playerShips.fourShip;
 let currentCompShp = computerShips.fourShip;
+let totalPlayerShips;
+let totalComputerShips;
 
 field.addEventListener('click', placingShip);
-randomBut.addEventListener('click', placingRandom);
-compBut.addEventListener('click', computerPlacing);
+randomBut.addEventListener('click', () => placingRandom('player'));
+compBut.addEventListener('click', () => placingRandom('computer'));
 
 buttonFour.addEventListener('click', () => {
   currentShip = playerShips.fourShip;
@@ -93,33 +91,38 @@ function nextShips(current, player) {
   if (player === 'player') {
     if (current.size === 4) {
       currentShip = playerShips.threeShip;
+      placingRandom(player)
     }
     if (current.size === 3) {
       currentShip = playerShips.twoShip;
+      placingRandom(player)
     }
     if (current.size === 2) {
       currentShip = playerShips.oneShip;
+      placingRandom(player)
     }
     if (current.size === 1) {
       return;
     }
-    placingRandom()
   }
   if (player === 'computer') {
     if (current.size === 4) {
       currentCompShp = computerShips.threeShip;
+      placingRandom(player)
     }
     if (current.size === 3) {
       currentCompShp = computerShips.twoShip;
+      placingRandom(player)
     }
     if (current.size === 2) {
       currentCompShp = computerShips.oneShip;
+      placingRandom(player)
     }
     if (current.size === 1) {
       return;
     }
-    computerPlacing()
   }
+  return;
 }
 
 function randomAxisFunc() {
@@ -131,6 +134,7 @@ function randomAxisFunc() {
       axis.main = 'x';
       axis.second = 'y';
     }
+    return;
 }
 // 123
 
@@ -180,50 +184,70 @@ function computerPlacing() {
   console.log(computerShipsRest)
 }
 
-function placingRandom() {
-  if (playerShips.fourShip.rest > 0) {
-    currentShip = playerShips.fourShip;
+async function placingRandom(whoRandom) {
+  let turn = whoRandom;
+  let shipsObj;
+  let currShip;
+  let targetFld;
+  let color;
+  if (turn === 'player') {
+    total = totalPlayerShips;
+    shipsObj = playerShips;
+    currShip = currentShip;
+    targetFld = field;
+    color = 'blue';
   }
-  if (totalShipsRest <= 0) return;
-  randomAxisFunc();
-  if (currentShip.rest === 0) {
-    nextShips(currentShip, 'player');
+  if (turn === 'computer') {
+    total = totalComputerShips;
+    shipsObj = computerShips;
+    currShip = currentCompShp;
+    targetFld = fieldComp;
+    color = 'green';
+  }
+  if (total === 0) return;
+  if (shipsObj.fourShip.rest > 0) {
+    currShip = shipsObj.fourShip;
+  }
+  
+  if (currShip.rest === 0) {
+    await nextShips(currShip, turn);
     console.log('Закончились корабли');
-    placingRandom();
     return;
   }
   let randomCol = +(Math.random().toString().substr(2, 1)) + 1;
   let randomRow = +(Math.random().toString().substr(2, 1)) + 1;
-  if (!field.querySelector(`div[data-row="${randomRow}"][data-col="${randomCol}"]`).classList.contains('white')) {
+  await randomAxisFunc();
+  if (!targetFld.querySelector(`div[data-row="${randomRow}"][data-col="${randomCol}"]`).classList.contains('white')) {
     console.log('Попало по синему')
-    placingRandom();
+    placingRandom(turn);
     return;
   }
-  if (spaceChecking(currentShip.size, randomRow, randomCol, field)) {
-    if (totalShipsRest > 0) {
-      placingRandom();
+  if (spaceChecking(currShip.size, randomRow, randomCol, targetFld)) {
+    if (total > 0) {
+      placingRandom(turn);
+      return;
     }
     console.log('Не прошло проверку')
-    placingRandom();
+    placingRandom(turn);
     return;
   }
-  field.querySelector(`div[data-row="${randomRow}"][data-col="${randomCol}"]`).classList.add('blue');
-  field.querySelector(`div[data-row="${randomRow}"][data-col="${randomCol}"]`).classList.remove('white');
+  targetFld.querySelector(`div[data-row="${randomRow}"][data-col="${randomCol}"]`).classList.add(color);
+  targetFld.querySelector(`div[data-row="${randomRow}"][data-col="${randomCol}"]`).classList.remove('white');
 
-  for (let i = 1; i < currentShip.size; i++) {
+  for (let i = 1; i < currShip.size; i++) {
     if (axis.main === 'y') {
       randomRow = randomRow - 1;
     } else {
       randomCol = randomCol - 1;
     }
-    field.querySelector(`div[data-row="${randomRow}"][data-col="${randomCol}"]`).classList.add('blue');
-    field.querySelector(`div[data-row="${randomRow}"][data-col="${randomCol}"]`).classList.remove('white');    
+    targetFld.querySelector(`div[data-row="${randomRow}"][data-col="${randomCol}"]`).classList.add(color);
+    targetFld.querySelector(`div[data-row="${randomRow}"][data-col="${randomCol}"]`).classList.remove('white');    
   }
-    currentShip.rest = currentShip.rest - 1;
-    totalShipsRest = playerShips.fourShip.rest + playerShips.threeShip.rest + playerShips.twoShip.rest + playerShips.oneShip.rest;
-    closing(field);
-    placingRandom();
-    console.log(totalShipsRest)
+    currShip.rest = --currShip.rest;
+    total = shipsObj.fourShip.rest + shipsObj.threeShip.rest + shipsObj.twoShip.rest + shipsObj.oneShip.rest;    
+    closing(targetFld);
+    placingRandom(turn);
+    return;
 }
 
 function placingShip(e) {
