@@ -132,6 +132,7 @@ function randomAxisFunc() {
       axis.second = 'y';
     }
 }
+// 123
 
 function computerPlacing() {
    if (computerShips.fourShip.rest > 0) {
