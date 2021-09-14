@@ -2,6 +2,7 @@
 	display: flex;
 	justify-content: space-around;
 	align-items: center;
+	margin-bottom: 50px;
 }
 
 .field, .field-2 {
@@ -13,6 +14,11 @@
 	border: 1px solid #000000;
 }
 
+.active {
+	box-shadow: 3px 2px 5px;
+	transition: box-shadow .1s linear;
+}
+
 .chunk {
 	width: 48px;
 	height: 48px;
@@ -20,23 +26,23 @@
 }
 
 .miss {
-	background: rgb(243, 238, 171);
+	background: rgb(250, 248, 216);
 }
 
 .closed {
-	background: #cccccc;
+	background: #dadada;
 }
 
 .blue {
-	background: blue;
+	background: rgb(82, 116, 179);
 }
 
 .unshootable {
-	background: rgb(145, 99, 150);
+	background: rgb(191, 175, 175);
 }
 
 .dead {
-	background: rgb(102, 50, 7);
+	background: rgb(130, 83, 45);
 }
 
 .red {
@@ -47,12 +53,75 @@
 	background: green;
 }
 
+.start {
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+.message {
+	height: 15px;
+}
+
+.user_props {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.ships {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.ships__item {
+	margin-bottom: 10px;
+}
+
+.axis {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.button {
+	letter-spacing: 1px;
+	cursor: pointer;
+	border: 1px solid #000000;
+	border-radius: 5% 5% 5% 5%;
+	transition: all .1s linear;
+}
+
+.button:hover {
+	background: #cccccc;
+}
+
+.button_active {
+	box-shadow: inset 1px 1px 2px;
+}
+
+.button_start {
+	width: 100px;
+	height: 30px;
+	margin-bottom: 10px;
+	text-transform: uppercase;
+}
+
+.button_ship {
+	width: 250px;
+}
+
+.button_axis {
+	margin: 10px;
+	width: 116px;
+}
+
 @media (max-width: 1049px) {
 	.wrapper {
-		flex-direction: column;
+		flex-direction: column-reverse;
 	}
 
-	.field-2 {
+	.field {
 		margin-top: 10px;
 	}
 }

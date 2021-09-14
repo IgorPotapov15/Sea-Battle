@@ -11,31 +11,36 @@ const compBut = document.querySelector('#comp');
 const playerBut = document.querySelector('#player');
 const start = document.querySelector('#start');
 const msg = document.querySelector('#msg');
+const btnFourCount = document.querySelector('#b4c')
+const btnThreeCount = document.querySelector('#b3c')
+const btnTwoCount = document.querySelector('#b2c')
+const btnOneCount = document.querySelector('#b1c')
+const userProps = document.querySelector('.user_props')
+const axisDiv = document.querySelector('.axis');
 
 const axis = {
   main: 'y',
-  second: 'x'
 }
 
 const playerShips = {
   coords: [],
   fourShip: {
-    name: 'fourShip',
+    btn: btnFourCount,
     rest: 1,
     size: 4
   },
   threeShip: {
-    name: 'threeShip',
+    btn: btnThreeCount,
     rest: 2,
     size: 3
   },
   twoShip: {
-    name: 'twoShip',
+    btn: btnTwoCount,
     rest: 3,
     size: 2
   },
   oneShip: {
-    name: 'oneShip',
+    btn: btnOneCount,
     rest: 4,
     size: 1
   },
@@ -65,8 +70,8 @@ const computerShips = {
   }
 }
 
-let allChunks = [];
-let allCompChunks = [];
+let playerChunks = [];
+let computerChunks = [];
 let closedChunks = [];
 let closedCompChunks = [];
 let unshootableChunks = [];
@@ -78,31 +83,49 @@ let selectedCompShip;
 let totalPlayerShips;
 let totalComputerShips;
 
+let lastCrashedTargetCol;
+let lastCrashedTargetRow;
+let currentDirection;
+
+let isGameStarted = false;
+let isGameEnded = false;
+
 field.addEventListener('click', manualHandler);
+fieldComp.addEventListener('click', playerTurn)
+start.addEventListener('click', startGame)
 randomBut.addEventListener('click', () => randomHandler('player'));
 
 buttonFour.addEventListener('click', () => {
   selectedPlayerShip = playerShips.fourShip;
+  changeActiveBtn(buttonFour, userProps)
 })
 buttonThree.addEventListener('click', () => {
   selectedPlayerShip = playerShips.threeShip;
+  changeActiveBtn(buttonThree, userProps)
 })
 buttonTwo.addEventListener('click', () => {
   selectedPlayerShip = playerShips.twoShip;
+  changeActiveBtn(buttonTwo, userProps)
 })
 buttonOne.addEventListener('click', () => {
   selectedPlayerShip = playerShips.oneShip;
+  changeActiveBtn(buttonOne, userProps)
 })
 
 turnX.addEventListener(('click'), () => {
   axis.main = 'x';
-  axis.second = 'y';
+  changeActiveBtn(turnX, axisDiv)
 });
-
 turnY.addEventListener(('click'), () => {
   axis.main = 'y';
-  axis.second = 'x';
+  changeActiveBtn(turnY, axisDiv)
 });
+
+function changeActiveBtn(newActive, place) {
+  let prevAct = place.querySelector('.button_active');
+  prevAct.classList.remove('button_active');
+  newActive.classList.add('button_active');
+}
 
 function nextShips(current, player) {
   if (player === 'player') {
@@ -161,10 +184,8 @@ function randomAxisFunc() {
   let randomAxis = Math.random();
     if (randomAxis <= 0.5) {
       axis.main = 'y';
-      axis.second = 'x';
     } else {
       axis.main = 'x';
-      axis.second = 'y';
     }
     return;
 }
@@ -182,14 +203,14 @@ async function randomHandler(whoRandom) {
     shipsObj = playerShips;
     currShip = selectedPlayerShip;
     targetFld = field;
-    mainArr = allChunks
+    mainArr = playerChunks
   }
   if (turn === 'computer') {
     total = totalComputerShips;
     shipsObj = computerShips;
     currShip = selectedCompShip;
     targetFld = fieldComp;
-    mainArr = allCompChunks
+    mainArr = computerChunks
   }
   if (total === 0) return;
   if (shipsObj.fourShip.rest > 0) {
@@ -222,14 +243,6 @@ async function randomHandler(whoRandom) {
     return;
 }
 
-function pushingCoords(targetObj, row, col) {
-  let newCoord = {
-    row: +row,
-    col: +col
-  }
-  targetObj.coords.push(newCoord);
-}
-
 function manualHandler(e) {
   if (selectedPlayerShip.rest === 0) return;
   if (!e.target.hasAttribute('data-col')) return;
@@ -246,7 +259,7 @@ function placingShip(fld, turn, selectedPlayerShip, row, col) {
   let tempObj = [];
   let obj = turn === 'player' ? playerShips : computerShips;
   let color = turn === 'player' ? 'blue' : 'green';
-  let tempArr = turn === 'player' ? allChunks : allCompChunks;
+  let tempArr = turn === 'player' ? playerChunks : computerChunks;
   tempArr.forEach((item) => {
     if (item.row == row && item.col == col) {
       item.free = false;
@@ -276,10 +289,11 @@ function placingShip(fld, turn, selectedPlayerShip, row, col) {
   selectedPlayerShip.rest = selectedPlayerShip.rest - 1;
   totalShipsRest = obj.fourShip.rest + obj.threeShip.rest + obj.twoShip.rest + obj.oneShip.rest;
   if (turn === 'player') {
-    closingForPlace(allChunks, 'close')
+    selectedPlayerShip.btn.innerHTML = `Осталось: ${selectedPlayerShip.rest}`
+    closingForPlace(playerChunks, 'close')
   }
   if (turn === 'computer') {
-    closingForPlace(allCompChunks, 'close')
+    closingForPlace(computerChunks, 'close')
   }
 }
 
@@ -322,17 +336,17 @@ function isClosed(tempRow, tempCol, turn) {
 let whiteComp = fieldComp.querySelectorAll('.white');
 let nodeListComp = [...whiteComp];
 nodeListComp.forEach((item) => {
-  allCompChunks.push({row: +item.attributes[1].nodeValue, col: +item.attributes[2].nodeValue, free: true, closed: false, crashed: false, shipIsDead: false, unshootable: false, missed: false})
+  computerChunks.push({row: +item.attributes[1].nodeValue, col: +item.attributes[2].nodeValue, free: true, closed: false, crashed: false, shipIsDead: false, unshootable: false, missed: false})
 })
 
 let white = field.querySelectorAll('.white');
 let nodeList = [...white]
 nodeList.forEach((item) => {
-  allChunks.push({row: +item.attributes[1].nodeValue, col: +item.attributes[2].nodeValue, free: true, closed: false, crashed: false, shipIsDead: false, unshootable: false, missed: false})
+  playerChunks.push({row: +item.attributes[1].nodeValue, col: +item.attributes[2].nodeValue, free: true, closed: false, crashed: false, shipIsDead: false, unshootable: false, missed: false})
 })
 
 function closingForPlace(allArr, kindOfClosing) {
-  let fld = allArr === allChunks ? field : fieldComp
+  let fld = allArr === playerChunks ? field : fieldComp
   let shipChunks = allArr.filter((item) => item.free === false);
   let deadChunks = allArr.filter((item) => item.shipIsDead === true);
 
@@ -359,15 +373,15 @@ function closingForPlace(allArr, kindOfClosing) {
         }
       })
     })
-    if (allArr === allCompChunks) {
+    if (allArr === computerChunks) {
       closedCompChunks = allArr.filter((item) => (item.closed === true && item.free === true))
     }
-    if (allArr === allChunks) {
+    if (allArr === playerChunks) {
       closedChunks = allArr.filter((item) => (item.closed === true && item.free === true))
       closedChunks.forEach((item) => {
       let closedRow = item.row;
       let closedCol = item.col; 
-      if (allArr === allChunks) {
+      if (allArr === playerChunks) {
         field.querySelector(`div[data-row="${+(closedRow)}"][data-col="${+(closedCol)}"]`).classList.add('closed')
       }
     })
@@ -406,8 +420,9 @@ function closingForPlace(allArr, kindOfClosing) {
   }
 }
 
-function displayMessage(message) {
+function displayMessage(message, isError) {
   msg.innerHTML = message;
+  msg.style.color = isError ? 'red' : ''
   setTimeout(() => {
     msg.innerHTML = '';
   }, 2000)
@@ -416,15 +431,15 @@ function displayMessage(message) {
 function startGame() {
   let totalShipsRest = playerShips.fourShip.rest + playerShips.threeShip.rest + playerShips.twoShip.rest + playerShips.oneShip.rest;
   if (totalShipsRest > 0) {
-    displayMessage('Ошибка: Не все корабли были расставлены.')
+    displayMessage('Ошибка: Не все корабли были расставлены.', 'error')
     return;
   }
   randomHandler('computer');
   let randomFirst = Math.random();
   if (randomFirst <= 0.5) {
-    isPlayerTurn = true;
+    changeTurn(true)
   } else {
-    isPlayerTurn = false
+    changeTurn(false)
   }
   if (isPlayerTurn) {
     displayMessage('Первый ход - ваш')
@@ -435,13 +450,9 @@ function startGame() {
     randomHandler('computer')
     computerTurn();
   }
+  start.disabled = true;
+  userProps.style.display = 'none';
 }
-
-let isGameStarted = false;
-let isGameEnded = false;
-
-fieldComp.addEventListener('click', playerTurn)
-start.addEventListener('click', startGame)
 
 function startFunc() {
   if (isGameStarted === true || isGameEnded === true) return;
@@ -459,7 +470,7 @@ function playerTurn(e) {
 
     let targetCol = +e.target.dataset.col;
     let targetRow = +e.target.dataset.row;
-    allCompChunks.forEach((item) => {
+    computerChunks.forEach((item) => {
       if (item.row === targetRow && item.col === targetCol) {
         if (item.free === false && item.crashed === false) {
           item.crashed = true;
@@ -472,24 +483,20 @@ function playerTurn(e) {
           });
           fieldComp.querySelector(`div[data-row="${+(targetRow)}"][data-col="${+(targetCol)}"]`).classList.add('red')
           fieldComp.querySelector(`div[data-row="${+(targetRow)}"][data-col="${+(targetCol)}"]`).classList.remove('green')
-          endGame(allCompChunks)
+          endGame(computerChunks)
           return;
         }
         if (item.free === true) {
           fieldComp.querySelector(`div[data-row="${+(targetRow)}"][data-col="${+(targetCol)}"]`).classList.add('miss')
           item.missed = true;
-          isPlayerTurn = false;
-          computerTurn()
+          changeTurn(false)
+          setTimeout(computerTurn, 1000)
           return;
         }
       }
     })
-    checkIsAlive(computerShips, fieldComp, allCompChunks)
+    checkIsAlive(computerShips, fieldComp, computerChunks)
   }
-
-let lastCrashedTargetCol;
-let lastCrashedTargetRow;
-let currentDirection;
 
 function chooseDirection() {
 let nextChunk = Math.floor(Math.random() * 4)
@@ -554,14 +561,27 @@ function goBack() {
 
 function endGame(array) {
   restAliveShip = array.find((item) => item.free === false && item.crashed === false);
-  if (restAliveShip === undefined && array == allChunks) {
+  if (restAliveShip === undefined && array == playerChunks) {
     isGameEnded = true;
     msg.innerHTML = "Игра окончена. Вы проиграли"
-  } else if (restAliveShip === undefined && array == allCompChunks) {
+    msg.style.color = 'red'
+  } else if (restAliveShip === undefined && array == computerChunks) {
     isGameEnded = true;
     msg.innerHTML = "Игра окончена. Вы победили"
+    msg.style.color = 'green'
   } else {
     return;
+  }
+}
+
+function changeTurn(bool) {
+  isPlayerTurn = bool;
+  if (isPlayerTurn) {
+    field.classList.remove('active')
+    fieldComp.classList.add('active')
+  } else {
+    field.classList.add('active')
+    fieldComp.classList.remove('active')
   }
 }
 
@@ -570,13 +590,12 @@ function computerTurn() {
   if (isPlayerTurn) return;
   let targetCol = lastCrashedTargetCol === undefined ? +(Math.random().toString().substr(2, 1)) : lastCrashedTargetCol;
   let targetRow = lastCrashedTargetRow === undefined ? +(Math.random().toString().substr(2, 1)) : lastCrashedTargetRow;
-  let supposedChunk = allChunks.find((item) => item.col ===  targetCol && item.row === targetRow);
+  let supposedChunk = playerChunks.find((item) => item.col ===  targetCol && item.row === targetRow);
   if (supposedChunk === undefined && currentDirection !== undefined) {
     goBack()
     return;
   }
-  console.log(targetRow, targetCol)
-  allChunks.forEach((item) => {
+  playerChunks.forEach((item) => {
     if (item.row === targetRow && item.col === targetCol) {
       if (item.free) {
         if (item.missed || item.unshootable) {
@@ -586,7 +605,7 @@ function computerTurn() {
           field.querySelector(`div[data-row="${+(targetRow)}"][data-col="${+(targetCol)}"]`).classList.remove('closed')
           field.querySelector(`div[data-row="${+(targetRow)}"][data-col="${+(targetCol)}"]`).classList.add('miss')
           item.missed = true;
-          isPlayerTurn = true;
+          changeTurn(true)
           goBack();
           return;
         }
@@ -612,10 +631,10 @@ function computerTurn() {
               target.crashed = true;
             }        
           })
-          endGame(allChunks)
+          endGame(playerChunks)
           lastCrashedTargetRow = targetRow;
           lastCrashedTargetCol = targetCol;
-          checkIsAlive(playerShips, field, allChunks)
+          checkIsAlive(playerShips, field, playerChunks)
           setTimeout(computerTurn, 1000)
           return;
         }
@@ -627,9 +646,6 @@ function computerTurn() {
 function checkIsAlive(obj, fld, chunksArray) {
   obj.coords.forEach((item) => {
       let result = item.some((el) => el.crashed === false);
-      if (fld === fieldComp) {
-        console.log(item)
-      }
       if (result === false) {
          item.forEach((crashedCoords) => {
             crashedCoords.shipIsDead = true;
@@ -642,7 +658,6 @@ function checkIsAlive(obj, fld, chunksArray) {
             })
         })
       }
-      result = '';
   })
   closingForPlace(chunksArray, 'dead')
 }
