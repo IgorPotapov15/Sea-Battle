@@ -26,22 +26,26 @@ const axis = {
 const playerShips = {
   coords: [],
   fourShip: {
-    btn: btnFourCount,
+    btn: buttonFour,
+    counter: btnFourCount,
     rest: 1,
     size: 4
   },
   threeShip: {
-    btn: btnThreeCount,
+    btn: buttonThree,
+    counter: btnThreeCount,
     rest: 2,
     size: 3
   },
   twoShip: {
-    btn: btnTwoCount,
+    btn: buttonTwo,
+    counter: btnTwoCount,
     rest: 3,
     size: 2
   },
   oneShip: {
-    btn: btnOneCount,
+    btn: buttonOne,
+    counter: btnOneCount,
     rest: 4,
     size: 1
   },
@@ -290,7 +294,10 @@ function placingShip(fld, turn, selectedPlayerShip, row, col) {
   selectedPlayerShip.rest = selectedPlayerShip.rest - 1;
   totalShipsRest = obj.fourShip.rest + obj.threeShip.rest + obj.twoShip.rest + obj.oneShip.rest;
   if (turn === 'player') {
-    selectedPlayerShip.btn.innerHTML = `Осталось: ${selectedPlayerShip.rest}`
+    selectedPlayerShip.counter.innerHTML = `Осталось: ${selectedPlayerShip.rest}`
+    if (selectedPlayerShip.rest === 0) {
+      selectedPlayerShip.btn.disabled = true;
+    }
     closingForPlace(playerChunks, 'close')
   }
   if (turn === 'computer') {
