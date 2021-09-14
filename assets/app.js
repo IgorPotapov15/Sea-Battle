@@ -80,7 +80,6 @@ let totalComputerShips;
 
 field.addEventListener('click', manualHandler);
 randomBut.addEventListener('click', () => randomHandler('player'));
-compBut.addEventListener('click', () => randomHandler('computer'));
 
 buttonFour.addEventListener('click', () => {
   selectedPlayerShip = playerShips.fourShip;
@@ -143,7 +142,6 @@ function nextShips(current, player) {
   return;
 }
 
-
 function checkShips(player) {
   if (player === 'player') {
     selectedPlayerShip = playerShips.fourShip.rest ? playerShips.fourShip :
@@ -184,12 +182,14 @@ async function randomHandler(whoRandom) {
     shipsObj = playerShips;
     currShip = selectedPlayerShip;
     targetFld = field;
+    mainArr = allChunks
   }
   if (turn === 'computer') {
     total = totalComputerShips;
     shipsObj = computerShips;
     currShip = selectedCompShip;
     targetFld = fieldComp;
+    mainArr = allCompChunks
   }
   if (total === 0) return;
   if (shipsObj.fourShip.rest > 0) {
@@ -203,7 +203,8 @@ async function randomHandler(whoRandom) {
   let randomRow = +(Math.random().toString().substr(2, 1));
   randomAxisFunc();
 
-  if (!targetFld.querySelector(`div[data-row="${randomRow}"][data-col="${randomCol}"]`).classList.contains('white')) {
+  let result = mainArr.find(item => item.row === randomRow && item.col === randomCol)
+  if (result.free === false) {
     randomHandler(turn);
     return;
   }
@@ -254,7 +255,6 @@ function placingShip(fld, turn, selectedPlayerShip, row, col) {
   if (turn === 'player') {
     fld.querySelector(`div[data-row="${row}"][data-col="${col}"]`).classList.add(color);
   }
-  fld.querySelector(`div[data-row="${row}"][data-col="${col}"]`).classList.remove('white');
   for (let i = 1; i < selectedPlayerShip.size; i++) {
     tempObj.push({row: +row, col: +col, crashed: false, shipIsDead: false})
     if (axis.main === 'y') {
@@ -270,7 +270,6 @@ function placingShip(fld, turn, selectedPlayerShip, row, col) {
     if (turn === 'player') {
       fld.querySelector(`div[data-row="${row}"][data-col="${col}"]`).classList.add(color);
     }
-    fld.querySelector(`div[data-row="${row}"][data-col="${col}"]`).classList.remove('white');
   }
   tempObj.push({row: +row, col: +col, crashed: false, shipIsDead: false})
   obj.coords.push(tempObj)
@@ -433,6 +432,7 @@ function startGame() {
   } else {
     displayMessage('Первый ходит противник')
     startFunc();
+    randomHandler('computer')
     computerTurn();
   }
 }
@@ -448,7 +448,7 @@ function startFunc() {
   isGameStarted = true;
 }
 
-async function playerTurn(e) {
+function playerTurn(e) {
     if (isGameStarted === false || isGameEnded === true) return;
     if (isPlayerTurn === false) return;
     if (!e.target.hasAttribute('data-col') || e.target.classList.contains('unshootable') || e.target.classList.contains('dead') || 
@@ -484,7 +484,7 @@ async function playerTurn(e) {
         }
       }
     })
-    await checkIsAlive(computerShips, fieldComp, allCompChunks)
+    checkIsAlive(computerShips, fieldComp, allCompChunks)
   }
 
 let lastCrashedTargetCol;
@@ -575,6 +575,7 @@ function computerTurn() {
     goBack()
     return;
   }
+  console.log(targetRow, targetCol)
   allChunks.forEach((item) => {
     if (item.row === targetRow && item.col === targetCol) {
       if (item.free) {
@@ -615,7 +616,7 @@ function computerTurn() {
           lastCrashedTargetRow = targetRow;
           lastCrashedTargetCol = targetCol;
           checkIsAlive(playerShips, field, allChunks)
-          isPlayerTurn = true;
+          setTimeout(computerTurn, 1000)
           return;
         }
       }
@@ -623,8 +624,8 @@ function computerTurn() {
   })
 }
 
-async function checkIsAlive(obj, fld, chunksArray) {
-  await obj.coords.forEach((item) => {
+function checkIsAlive(obj, fld, chunksArray) {
+  obj.coords.forEach((item) => {
       let result = item.some((el) => el.crashed === false);
       if (fld === fieldComp) {
         console.log(item)
@@ -645,5 +646,3 @@ async function checkIsAlive(obj, fld, chunksArray) {
   })
   closingForPlace(chunksArray, 'dead')
 }
-
-// Переписать closing под объект корабля, а не массив allchunks
