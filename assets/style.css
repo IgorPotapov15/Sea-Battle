@@ -1,0 +1,58 @@
+.wrapper {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+}
+
+.field, .field-2 {
+	min-width: 500px;
+	width: 500px;
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	border: 1px solid #000000;
+}
+
+.chunk {
+	width: 48px;
+	height: 48px;
+	border: 1px solid #000000;
+}
+
+.miss {
+	background: rgb(243, 238, 171);
+}
+
+.closed {
+	background: #cccccc;
+}
+
+.blue {
+	background: blue;
+}
+
+.unshootable {
+	background: rgb(145, 99, 150);
+}
+
+.dead {
+	background: rgb(102, 50, 7);
+}
+
+.red {
+	background: red;
+}
+
+.green {
+	background: green;
+}
+
+@media (max-width: 1049px) {
+	.wrapper {
+		flex-direction: column;
+	}
+
+	.field-2 {
+		margin-top: 10px;
+	}
+}
