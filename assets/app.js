@@ -17,6 +17,7 @@ const btnTwoCount = document.querySelector('#b2c')
 const btnOneCount = document.querySelector('#b1c')
 const userProps = document.querySelector('.user_props')
 const axisDiv = document.querySelector('.axis');
+const body = document.querySelector('body')
 
 const axis = {
   main: 'y',
@@ -559,16 +560,25 @@ function goBack() {
   return;
 }
 
+
 function endGame(array) {
   restAliveShip = array.find((item) => item.free === false && item.crashed === false);
   if (restAliveShip === undefined && array == playerChunks) {
     isGameEnded = true;
     msg.innerHTML = "Игра окончена. Вы проиграли"
     msg.style.color = 'red'
+    body.classList.add('lose')
+    setTimeout(() => {
+      body.classList.remove('lose')
+    }, 200);
   } else if (restAliveShip === undefined && array == computerChunks) {
     isGameEnded = true;
     msg.innerHTML = "Игра окончена. Вы победили"
     msg.style.color = 'green'
+    body.classList.add('win')
+    setTimeout(() => {
+      body.classList.remove('win')
+    }, 200);
   } else {
     return;
   }
