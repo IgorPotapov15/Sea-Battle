@@ -94,6 +94,7 @@ let currentDirection;
 
 let isGameStarted = false;
 let isGameEnded = false;
+let shootedInARow = 0;
 
 field.addEventListener('click', manualHandler);
 fieldComp.addEventListener('click', playerTurn)
@@ -541,28 +542,56 @@ function goNext() {
   if (currentDirection === 'right') {
     lastCrashedTargetCol = lastCrashedTargetCol + 1;
   }
+  if (isPlayerTurn === false) {
+    computerTurn()
+  }
   return;
 }
 
 function goBack() {
-  if (currentDirection === 'above') {
+  if (currentDirection === undefined && shootedInARow > 0) {
     chooseDirection()
+    return;
+  }
+
+  if (currentDirection === 'above') {
     lastCrashedTargetRow = lastCrashedTargetRow + 1;
+    if (shootedInARow > 1) {
+      currentDirection = 'below'
+      goNext()
+    } else {
+      chooseDirection()
+    }
   }
   if (currentDirection === 'below') {
-    chooseDirection()
     lastCrashedTargetRow = lastCrashedTargetRow - 1;
+    if (shootedInARow > 1) {
+      currentDirection = 'above'
+      goNext()
+    } else {
+      chooseDirection()
+    }
   }
   if (currentDirection === 'left') {
-    chooseDirection()
     lastCrashedTargetCol = lastCrashedTargetCol + 1;
+    if (shootedInARow > 1) {
+      currentDirection = 'right'
+      goNext()
+    } else {
+      chooseDirection()
+    }
   }
   if (currentDirection === 'right') {
-    chooseDirection()
     lastCrashedTargetCol = lastCrashedTargetCol - 1;
+    if (shootedInARow > 1) {
+      currentDirection = 'left'
+      goNext()
+    } else {
+      chooseDirection()
+    }
   }
   if (isPlayerTurn === false) {
-    computerTurn();
+    computerTurn()
   }
   return;
 }
@@ -608,9 +637,12 @@ function computerTurn() {
   let targetCol = lastCrashedTargetCol === undefined ? +(Math.random().toString().substr(2, 1)) : lastCrashedTargetCol;
   let targetRow = lastCrashedTargetRow === undefined ? +(Math.random().toString().substr(2, 1)) : lastCrashedTargetRow;
   let supposedChunk = playerChunks.find((item) => item.col ===  targetCol && item.row === targetRow);
-  if (supposedChunk === undefined && currentDirection !== undefined) {
+  if (supposedChunk === undefined) {
     goBack()
     return;
+  }
+  if (currentDirection === undefined) {
+    
   }
   playerChunks.forEach((item) => {
     if (item.row === targetRow && item.col === targetCol) {
@@ -628,17 +660,19 @@ function computerTurn() {
         }
       } else if (item.free === false) {
         if (item.shipIsDead === true){
-          lastCrashedTargetCol = undefined;
-          lastCrashedTargetRow = undefined;
-          currentDirection = undefined;
-          computerTurn();
-          return;
+            lastCrashedTargetCol = undefined;
+            lastCrashedTargetRow = undefined;
+            currentDirection = undefined;
+            shootedInARow = 0;
+            computerTurn()
+            return;
         } 
         if (item.crashed === true && item.shipIsDead === false) {
-          goNext();
-          computerTurn();
+          setTimeout(goNext, 1000);
+          // setTimeout(computerTurn, 1000)
           return;
         } else {
+          shootedInARow = shootedInARow + 1;
           field.querySelector(`div[data-row="${+(targetRow)}"][data-col="${+(targetCol)}"]`).classList.remove('blue')
           field.querySelector(`div[data-row="${+(targetRow)}"][data-col="${+(targetCol)}"]`).classList.add('red')
           item.crashed = true;
@@ -652,7 +686,7 @@ function computerTurn() {
           lastCrashedTargetRow = targetRow;
           lastCrashedTargetCol = targetCol;
           checkIsAlive(playerShips, field, playerChunks)
-          setTimeout(computerTurn, 1000)
+          computerTurn()
           return;
         }
       }
