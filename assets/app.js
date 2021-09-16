@@ -390,9 +390,6 @@ function closingForPlace(allArr, kindOfClosing) {
       closedChunks.forEach((item) => {
       let closedRow = item.row;
       let closedCol = item.col; 
-      if (allArr === playerChunks) {
-        field.querySelector(`div[data-row="${+(closedRow)}"][data-col="${+(closedCol)}"]`).classList.add('closed')
-      }
     })
     }
   }
@@ -420,12 +417,6 @@ function closingForPlace(allArr, kindOfClosing) {
       })
     })
     unshootableChunks = allArr.filter((item) => (item.unshootable === true && item.free === true))
-    unshootableChunks.forEach((item) => {
-      let unshootRow = item.row;
-      let unShootCol = item.col;
-      fld.querySelector(`div[data-row="${+(unshootRow)}"][data-col="${+(unShootCol)}"]`).classList.remove('miss')
-      fld.querySelector(`div[data-row="${+(unshootRow)}"][data-col="${+(unShootCol)}"]`).classList.add('unshootable')
-    })
   }
 }
 
@@ -521,11 +512,12 @@ let nextChunk = Math.floor(Math.random() * 4)
   if(nextChunk === 3) {
     currentDirection = 'right'
   }
+  console.log('chooseDirection', currentDirection)
   goNext()
-  return;
 }
 
 function goNext() {
+  console.log('goNext', lastCrashedTargetRow, lastCrashedTargetCol, currentDirection)
   if (currentDirection === undefined) {
     chooseDirection();
     return;
@@ -545,55 +537,64 @@ function goNext() {
   // if (isPlayerTurn === false) {
   //   computerTurn()
   // }
-  return;
+  isComputerTurn()
+  console.log('goNext after', lastCrashedTargetRow, lastCrashedTargetCol, currentDirection)
+}
+
+function isComputerTurn() {
+  console.log(isPlayerTurn === false);
+  if (isPlayerTurn === false) {
+      computerTurn()
+    }
 }
 
 function goBack() {
+  console.log('goBack', lastCrashedTargetRow, lastCrashedTargetCol, currentDirection)
   if (currentDirection === undefined && shootedInARow > 0) {
     chooseDirection()
     return;
-  }
-
-  if (currentDirection === 'above') {
-    lastCrashedTargetRow = lastCrashedTargetRow + 1;
-    if (shootedInARow > 1) {
-      currentDirection = 'below'
-      goNext()
-    } else {
-      chooseDirection()
+  } else {
+    if (currentDirection === 'above') {
+      lastCrashedTargetRow = lastCrashedTargetRow + 1;
+      if (shootedInARow > 1) {
+        currentDirection = 'below'
+        goNext()
+      } else {
+        chooseDirection()
+      }
     }
-  }
-  if (currentDirection === 'below') {
-    lastCrashedTargetRow = lastCrashedTargetRow - 1;
-    if (shootedInARow > 1) {
-      currentDirection = 'above'
-      goNext()
-    } else {
-      chooseDirection()
+    if (currentDirection === 'below') {
+      lastCrashedTargetRow = lastCrashedTargetRow - 1;
+      if (shootedInARow > 1) {
+        currentDirection = 'above'
+        goNext()
+      } else {
+        chooseDirection()
+      }
     }
-  }
-  if (currentDirection === 'left') {
-    lastCrashedTargetCol = lastCrashedTargetCol + 1;
-    if (shootedInARow > 1) {
-      currentDirection = 'right'
-      goNext()
-    } else {
-      chooseDirection()
+    if (currentDirection === 'left') {
+      lastCrashedTargetCol = lastCrashedTargetCol + 1;
+      if (shootedInARow > 1) {
+        currentDirection = 'right'
+        goNext()
+      } else {
+        chooseDirection()
+      }
     }
-  }
-  if (currentDirection === 'right') {
-    lastCrashedTargetCol = lastCrashedTargetCol - 1;
-    if (shootedInARow > 1) {
-      currentDirection = 'left'
-      goNext()
-    } else {
-      chooseDirection()
+    if (currentDirection === 'right') {
+      lastCrashedTargetCol = lastCrashedTargetCol - 1;
+      if (shootedInARow > 1) {
+        currentDirection = 'left'
+        goNext()
+      } else {
+        chooseDirection()
+      }
     }
-  }
-  if (isPlayerTurn === false) {
-    computerTurn()
-  }
-  return;
+    // if (isPlayerTurn === false) {
+    //   computerTurn()
+    // }
+    return;
+  }  
 }
 
 
@@ -641,19 +642,21 @@ function computerTurn() {
     goBack()
     return;
   }
+  console.log(targetRow, targetCol, currentDirection)
   playerChunks.forEach((item) => {
     if (item.row === targetRow && item.col === targetCol) {
       if (item.free) {
         if (item.missed || item.unshootable) {
+          // debugger
           goBack();
+          isComputerTurn()
           return;
         } else {
-          field.querySelector(`div[data-row="${+(targetRow)}"][data-col="${+(targetCol)}"]`).classList.remove('closed')
+          wait(500)
           field.querySelector(`div[data-row="${+(targetRow)}"][data-col="${+(targetCol)}"]`).classList.add('miss')
           item.missed = true;
-          changeTurn(true)
           goBack();
-          return;
+          changeTurn(true)
         }
       } else if (item.free === false) {
         if (item.shipIsDead === true){
@@ -661,12 +664,12 @@ function computerTurn() {
             lastCrashedTargetRow = undefined;
             currentDirection = undefined;
             shootedInARow = 0;
-            computerTurn()
+            isComputerTurn()
             return;
         } 
         if (item.crashed === true && item.shipIsDead === false) {
           goNext()
-          computerTurn()
+          return;
         } else {
           shootedInARow = shootedInARow + 1;
           field.querySelector(`div[data-row="${+(targetRow)}"][data-col="${+(targetCol)}"]`).classList.remove('blue')
@@ -682,7 +685,9 @@ function computerTurn() {
           lastCrashedTargetRow = targetRow;
           lastCrashedTargetCol = targetCol;
           checkIsAlive(playerShips, field, playerChunks)
-          setTimeout(computerTurn, 1000);
+          // setTimeout(computerTurn, 1000);
+          wait(500)
+          computerTurn()
           return;
         }
       }

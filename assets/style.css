@@ -39,19 +39,11 @@ body {
 }
 
 .miss {
-	background: rgb(255, 0, 234);
-}
-
-.closed {
-	background: #dadada;
+	background: rgb(202, 97, 255);
 }
 
 .blue {
 	background: rgb(82, 116, 179);
-}
-
-.unshootable {
-	background: rgb(191, 175, 175);
 }
 
 .dead {
@@ -60,10 +52,6 @@ body {
 
 .red {
 	background: red;
-}
-
-.green {
-	background: green;
 }
 
 .start {
