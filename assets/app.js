@@ -18,6 +18,7 @@ const btnOneCount = document.querySelector('#b1c')
 const userProps = document.querySelector('.user_props')
 const axisDiv = document.querySelector('.axis');
 const body = document.querySelector('body')
+const shipModel4 = document.querySelector('.four-ship')
 
 const axis = {
   main: 'y',
@@ -100,6 +101,39 @@ field.addEventListener('click', manualHandler);
 fieldComp.addEventListener('click', playerTurn)
 start.addEventListener('click', startGame)
 randomBut.addEventListener('click', () => randomHandler('player'));
+
+shipModel4.onmousedown = function(event) {
+  shipModel4.style.position = 'absolute';
+  shipModel4.style.zIndex = 1000;
+  document.body.append(shipModel4);
+
+  moveAt(event.pageX, event.pageY);
+
+  function moveAt(pageX, pageY) {
+    shipModel4.style.left = pageX - shipModel4.offsetWidth / 2 + 'px'
+    shipModel4.style.top = pageY - shipModel4.offsetHeight / 1.1 + 'px'
+  }
+
+  function onMouseMove(event) {
+    moveAt(event.pageX, event.pageY);
+  }
+
+  document.addEventListener('mousemove', onMouseMove);
+  shipModel4.onmouseup = function(e) {
+    let d = document.elementFromPoint(e.pageX, e.pageY)
+    console.log(d)
+    // placingShip(field, 'player', playerShips.fourShip, currentRow, currentCol)
+    document.removeEventListener('mousemove', onMouseMove)
+    shipModel4.onmouseup = null;
+  }
+}
+
+console.log(document.clientX)
+
+shipModel4.ondragstart = function() {
+  return false;
+};
+
 
 buttonFour.addEventListener('click', () => {
   selectedPlayerShip = playerShips.fourShip;
@@ -260,6 +294,8 @@ function manualHandler(e) {
 
   placingShip(field, 'player', selectedPlayerShip, currentRow, currentCol)
 }
+
+
 
 function placingShip(fld, turn, selectedPlayerShip, row, col) {
   let tempObj = [];
