@@ -499,7 +499,7 @@ function playerTurn(e) {
           fieldComp.querySelector(`div[data-row="${+(targetRow)}"][data-col="${+(targetCol)}"]`).classList.add('miss')
           item.missed = true;
           changeTurn(false)
-          setTimeout(computerTurn, 1000)
+          setTimeout(computerTurn, 1000);
           return;
         }
       }
@@ -542,9 +542,9 @@ function goNext() {
   if (currentDirection === 'right') {
     lastCrashedTargetCol = lastCrashedTargetCol + 1;
   }
-  if (isPlayerTurn === false) {
-    computerTurn()
-  }
+  // if (isPlayerTurn === false) {
+  //   computerTurn()
+  // }
   return;
 }
 
@@ -641,9 +641,6 @@ function computerTurn() {
     goBack()
     return;
   }
-  if (currentDirection === undefined) {
-    
-  }
   playerChunks.forEach((item) => {
     if (item.row === targetRow && item.col === targetCol) {
       if (item.free) {
@@ -668,9 +665,8 @@ function computerTurn() {
             return;
         } 
         if (item.crashed === true && item.shipIsDead === false) {
-          setTimeout(goNext, 1000);
-          // setTimeout(computerTurn, 1000)
-          return;
+          goNext()
+          computerTurn()
         } else {
           shootedInARow = shootedInARow + 1;
           field.querySelector(`div[data-row="${+(targetRow)}"][data-col="${+(targetCol)}"]`).classList.remove('blue')
@@ -686,11 +682,12 @@ function computerTurn() {
           lastCrashedTargetRow = targetRow;
           lastCrashedTargetCol = targetCol;
           checkIsAlive(playerShips, field, playerChunks)
-          computerTurn()
+          setTimeout(computerTurn, 1000);
           return;
         }
       }
     }
+    return;
   })
 }
 
@@ -711,4 +708,12 @@ function checkIsAlive(obj, fld, chunksArray) {
       }
   })
   closingForPlace(chunksArray, 'dead')
+}
+
+function wait(ms) {
+  var start = Date.now(),
+      now = start;
+  while (now - start < ms) {
+    now = Date.now();
+  }
 }
