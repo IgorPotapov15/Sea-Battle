@@ -134,8 +134,22 @@ function dragNdrop(event) {
 
   function moveAt(pageX, pageY) {
     if (axis.main === 'x') {
-      copy.style.left = pageX - copy.offsetWidth - 65 + 'px'
-      copy.style.top = pageY - copy.offsetHeight / 1.8 + 'px'
+      if (selectedShip === playerShips.fourShip) {
+        copy.style.left = pageX - copy.offsetWidth - 65 + 'px'
+        copy.style.top = pageY - copy.offsetHeight / 1.8 + 'px'
+      }
+      if (selectedShip === playerShips.threeShip) {
+        copy.style.left = pageX - copy.offsetWidth - 40 + 'px'
+        copy.style.top = pageY - copy.offsetHeight / 1.8 + 'px'
+      }
+      if (selectedShip === playerShips.twoShip) {
+        copy.style.left = pageX - copy.offsetWidth - 20 + 'px'
+        copy.style.top = pageY - copy.offsetHeight / 1.8 + 'px'
+      }
+      if (selectedShip === playerShips.oneShip) {
+        copy.style.left = pageX - copy.offsetWidth / 1.6 + 'px'
+        copy.style.top = pageY - copy.offsetHeight / 1.05 + 'px'
+      }
     } else {
       copy.style.left = pageX - copy.offsetWidth / 1.6 + 'px'
       copy.style.top = pageY - copy.offsetHeight / 1.05 + 'px'
@@ -143,7 +157,9 @@ function dragNdrop(event) {
   }
 
   function onMouseMove(event) {
-    
+    if (selectedShip.rest === 1) {
+      selectedShip.model.style.display = 'none';
+    }
     moveAt(event.pageX, event.pageY);
   }
 
@@ -158,7 +174,10 @@ function dragNdrop(event) {
 
 function getCoords(eX, eY, selectedShip) {
   let targetChunk = document.elementFromPoint(eX, eY)
-  if (targetChunk.parentNode === fieldComp) return;
+  if (targetChunk.parentNode !== field) {
+    selectedShip.model.style.display = 'block';
+    return;
+  }
   let targetRow = targetChunk.dataset.row
   let targetCol = targetChunk.dataset.col
   console.log(targetRow, targetCol)
