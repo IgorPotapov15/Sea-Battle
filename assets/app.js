@@ -18,34 +18,37 @@ const btnOneCount = document.querySelector('#b1c')
 const userProps = document.querySelector('.user_props')
 const axisDiv = document.querySelector('.axis');
 const body = document.querySelector('body')
-const shipModel4id1 = document.querySelector('#s4-1')
+const shipModel4 = document.querySelector('#s4')
+const shipModel3 = document.querySelector('#s3')
+const shipModel2 = document.querySelector('#s2')
+const shipModel1 = document.querySelector('#s1')
 
 const axis = {
-  main: 'x',
+  main: 'y',
 }
 
 const playerShips = {
   coords: [],
   fourShip: {
-    btn: buttonFour,
+    model: shipModel4,
     counter: btnFourCount,
     rest: 1,
     size: 4
   },
   threeShip: {
-    btn: buttonThree,
+    model: shipModel3,
     counter: btnThreeCount,
     rest: 2,
     size: 3
   },
   twoShip: {
-    btn: buttonTwo,
+    model: shipModel2,
     counter: btnTwoCount,
     rest: 3,
     size: 2
   },
   oneShip: {
-    btn: buttonOne,
+    model: shipModel1,
     counter: btnOneCount,
     rest: 4,
     size: 1
@@ -103,6 +106,22 @@ start.addEventListener('click', startGame)
 randomBut.addEventListener('click', () => randomHandler('player'));
 
 function dragNdrop(event) {
+  if (!event.target.parentNode.classList.contains('ship-model')) return;
+  let selectedShip;
+  switch (event.target.parentNode.getAttribute('id')) {
+    case 's4':
+      selectedShip = playerShips.fourShip;
+      break;
+    case 's3':
+      selectedShip = playerShips.threeShip;
+      break;
+    case 's2':
+      selectedShip = playerShips.twoShip;
+      break;
+    case 's1':
+      selectedShip = playerShips.oneShip;
+      break; 
+  }
   let copy = event.target.parentNode.cloneNode(true)
   copy.style.position = 'absolute';
   copy.style.zIndex = 1000;
@@ -124,34 +143,35 @@ function dragNdrop(event) {
   }
 
   function onMouseMove(event) {
+    
     moveAt(event.pageX, event.pageY);
   }
 
   document.addEventListener('mousemove', onMouseMove);
   copy.onmouseup = function(e) {
-    // let d = document.elementFromPoint(e.pageX, e.pageY)
-    // placingShip(field, 'player', playerShips.fourShip, currentRow, currentCol)
     copy.remove()
     document.removeEventListener('mousemove', onMouseMove)
     copy.onmouseup = null;
-    getCoords(e.clientX, e.clientY)
+    getCoords(e.clientX, e.clientY, selectedShip)
   }
 }
 
-function getCoords(eX, eY) {
+function getCoords(eX, eY, selectedShip) {
   let targetChunk = document.elementFromPoint(eX, eY)
+  if (targetChunk.parentNode === fieldComp) return;
   let targetRow = targetChunk.dataset.row
   let targetCol = targetChunk.dataset.col
   console.log(targetRow, targetCol)
-  if (spaceChecking(playerShips.fourShip.size, targetRow, targetCol, field, 'player')) return;
-  placingShip(field, 'player', playerShips.fourShip, targetRow, targetCol)
+  if (spaceChecking(selectedShip.size, targetRow, targetCol, field, 'player')) return;
+  placingShip(field, 'player', selectedShip, targetRow, targetCol)
 }
 
-shipModel4id1.addEventListener('mousedown', dragNdrop)
+shipModel4.addEventListener('mousedown', dragNdrop)
+shipModel3.addEventListener('mousedown', dragNdrop)
+shipModel2.addEventListener('mousedown', dragNdrop)
+shipModel1.addEventListener('mousedown', dragNdrop)
 
-console.log(document.clientX)
-
-shipModel4id1.ondragstart = function() {
+shipModel4.ondragstart = function() {
   return false;
 };
 
@@ -354,8 +374,9 @@ function placingShip(fld, turn, selectedPlayerShip, row, col) {
   if (turn === 'player') {
     selectedPlayerShip.counter.innerHTML = `Осталось: ${selectedPlayerShip.rest}`
     if (selectedPlayerShip.rest === 0) {
-      selectedPlayerShip.btn.disabled = true;
+      selectedPlayerShip.model.style.display = 'none';
     }
+
     closingForPlace(playerChunks, 'close')
   }
   if (turn === 'computer') {
