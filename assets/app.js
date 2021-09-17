@@ -11,10 +11,6 @@ const compBut = document.querySelector('#comp');
 const playerBut = document.querySelector('#player');
 const start = document.querySelector('#start');
 const msg = document.querySelector('#msg');
-const btnFourCount = document.querySelector('#b4c')
-const btnThreeCount = document.querySelector('#b3c')
-const btnTwoCount = document.querySelector('#b2c')
-const btnOneCount = document.querySelector('#b1c')
 const userProps = document.querySelector('.user_props')
 const axisDiv = document.querySelector('.axis');
 const body = document.querySelector('body')
@@ -31,25 +27,25 @@ const playerShips = {
   coords: [],
   fourShip: {
     model: shipModel4,
-    counter: btnFourCount,
+    counter: null,
     rest: 1,
     size: 4
   },
   threeShip: {
     model: shipModel3,
-    counter: btnThreeCount,
+    counter: null,
     rest: 2,
     size: 3
   },
   twoShip: {
     model: shipModel2,
-    counter: btnTwoCount,
+    counter: null,
     rest: 3,
     size: 2
   },
   oneShip: {
     model: shipModel1,
-    counter: btnOneCount,
+    counter: null,
     rest: 4,
     size: 1
   },
@@ -102,8 +98,36 @@ let shootedInARow = 0;
 
 field.addEventListener('click', manualHandler);
 fieldComp.addEventListener('click', playerTurn)
+fieldComp.addEventListener('contextmenu', closingHandler)
 start.addEventListener('click', startGame)
 randomBut.addEventListener('click', () => randomHandler('player'));
+
+turnX.addEventListener(('click'), () => {
+  axis.main = 'x';
+  changeActiveBtn(turnX, axisDiv)
+});
+turnY.addEventListener(('click'), () => {
+  axis.main = 'y';
+  changeActiveBtn(turnY, axisDiv)
+});
+
+function changeActiveBtn(newActive, place) {
+  let prevAct = place.querySelector('.button_active');
+  prevAct.classList.remove('button_active');
+  newActive.classList.add('button_active');
+}
+
+function closingHandler(e) {
+  e.preventDefault();
+  if (isGameStarted === false || isGameEnded === true) return;
+  if (isPlayerTurn === false) return;
+  if (!e.target.hasAttribute('data-col')) return;
+  if (e.target.classList.contains('marked')) {
+    e.target.classList.remove('marked')
+  } else {
+    e.target.classList.add('marked')
+  }
+}
 
 function dragNdrop(event) {
   if (!event.target.parentNode.classList.contains('ship-model')) return;
@@ -194,38 +218,12 @@ shipModel4.ondragstart = function() {
   return false;
 };
 
-
-buttonFour.addEventListener('click', () => {
-  selectedPlayerShip = playerShips.fourShip;
-  changeActiveBtn(buttonFour, userProps)
-})
-buttonThree.addEventListener('click', () => {
-  selectedPlayerShip = playerShips.threeShip;
-  changeActiveBtn(buttonThree, userProps)
-})
-buttonTwo.addEventListener('click', () => {
-  selectedPlayerShip = playerShips.twoShip;
-  changeActiveBtn(buttonTwo, userProps)
-})
-buttonOne.addEventListener('click', () => {
-  selectedPlayerShip = playerShips.oneShip;
-  changeActiveBtn(buttonOne, userProps)
-})
-
 turnX.addEventListener(('click'), () => {
   axis.main = 'x';
-  changeActiveBtn(turnX, axisDiv)
 });
 turnY.addEventListener(('click'), () => {
   axis.main = 'y';
-  changeActiveBtn(turnY, axisDiv)
 });
-
-function changeActiveBtn(newActive, place) {
-  let prevAct = place.querySelector('.button_active');
-  prevAct.classList.remove('button_active');
-  newActive.classList.add('button_active');
-}
 
 function nextShips(current, player) {
   if (player === 'player') {
@@ -391,7 +389,6 @@ function placingShip(fld, turn, selectedPlayerShip, row, col) {
   selectedPlayerShip.rest = selectedPlayerShip.rest - 1;
   totalShipsRest = obj.fourShip.rest + obj.threeShip.rest + obj.twoShip.rest + obj.oneShip.rest;
   if (turn === 'player') {
-    selectedPlayerShip.counter.innerHTML = `Осталось: ${selectedPlayerShip.rest}`
     if (selectedPlayerShip.rest === 0) {
       selectedPlayerShip.model.style.display = 'none';
     }
@@ -559,7 +556,7 @@ function startFunc() {
 function playerTurn(e) {
     if (isGameStarted === false || isGameEnded === true) return;
     if (isPlayerTurn === false) return;
-    if (!e.target.hasAttribute('data-col') || e.target.classList.contains('unshootable') || e.target.classList.contains('dead') || 
+    if (!e.target.hasAttribute('data-col') || e.target.classList.contains('marked') || e.target.classList.contains('dead') || 
     e.target.classList.contains('miss') || e.target.classList.contains('red')
     ) {
       return;

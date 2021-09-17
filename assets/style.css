@@ -37,10 +37,11 @@ body {
 	width: 48px;
 	height: 48px;
 	border: 1px solid #000000;
+	color: #ffffff;
 }
 
 .miss {
-	background: rgb(202, 97, 255);
+	background: rgb(253, 247, 201);
 }
 
 .blue {
@@ -86,7 +87,12 @@ body {
 	align-items: center;
 }
 
+.marked {
+	background-image: url('../assets/marked.png');
+}
+
 .button {
+	user-select: none;
 	letter-spacing: 1px;
 	cursor: pointer;
 	border: 1px solid #000000;
