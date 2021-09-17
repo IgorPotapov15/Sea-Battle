@@ -18,10 +18,10 @@ const btnOneCount = document.querySelector('#b1c')
 const userProps = document.querySelector('.user_props')
 const axisDiv = document.querySelector('.axis');
 const body = document.querySelector('body')
-const shipModel4 = document.querySelector('.four-ship')
+const shipModel4id1 = document.querySelector('#s4-1')
 
 const axis = {
-  main: 'y',
+  main: 'x',
 }
 
 const playerShips = {
@@ -102,16 +102,25 @@ fieldComp.addEventListener('click', playerTurn)
 start.addEventListener('click', startGame)
 randomBut.addEventListener('click', () => randomHandler('player'));
 
-shipModel4.onmousedown = function(event) {
-  shipModel4.style.position = 'absolute';
-  shipModel4.style.zIndex = 1000;
-  document.body.append(shipModel4);
+function dragNdrop(event) {
+  let copy = event.target.parentNode.cloneNode(true)
+  copy.style.position = 'absolute';
+  copy.style.zIndex = 1000;
+  if (axis.main === 'x') {
+    copy.style.transform = 'rotate(90deg)'
+  }
+  document.body.append(copy);
 
   moveAt(event.pageX, event.pageY);
 
   function moveAt(pageX, pageY) {
-    shipModel4.style.left = pageX - shipModel4.offsetWidth / 2 + 'px'
-    shipModel4.style.top = pageY - shipModel4.offsetHeight / 1.1 + 'px'
+    if (axis.main === 'x') {
+      copy.style.left = pageX - copy.offsetWidth - 65 + 'px'
+      copy.style.top = pageY - copy.offsetHeight / 1.8 + 'px'
+    } else {
+      copy.style.left = pageX - copy.offsetWidth / 1.6 + 'px'
+      copy.style.top = pageY - copy.offsetHeight / 1.05 + 'px'
+    }
   }
 
   function onMouseMove(event) {
@@ -119,18 +128,30 @@ shipModel4.onmousedown = function(event) {
   }
 
   document.addEventListener('mousemove', onMouseMove);
-  shipModel4.onmouseup = function(e) {
-    let d = document.elementFromPoint(e.pageX, e.pageY)
-    console.log(d)
+  copy.onmouseup = function(e) {
+    // let d = document.elementFromPoint(e.pageX, e.pageY)
     // placingShip(field, 'player', playerShips.fourShip, currentRow, currentCol)
+    copy.remove()
     document.removeEventListener('mousemove', onMouseMove)
-    shipModel4.onmouseup = null;
+    copy.onmouseup = null;
+    getCoords(e.clientX, e.clientY)
   }
 }
 
+function getCoords(eX, eY) {
+  let targetChunk = document.elementFromPoint(eX, eY)
+  let targetRow = targetChunk.dataset.row
+  let targetCol = targetChunk.dataset.col
+  console.log(targetRow, targetCol)
+  if (spaceChecking(playerShips.fourShip.size, targetRow, targetCol, field, 'player')) return;
+  placingShip(field, 'player', playerShips.fourShip, targetRow, targetCol)
+}
+
+shipModel4id1.addEventListener('mousedown', dragNdrop)
+
 console.log(document.clientX)
 
-shipModel4.ondragstart = function() {
+shipModel4id1.ondragstart = function() {
   return false;
 };
 
